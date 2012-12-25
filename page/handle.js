@@ -1,4 +1,4 @@
-var log, delay, q;
+var log, delay, q, random;
 log = function(){
   var ref$;
   return typeof console != 'undefined' && console !== null ? (ref$ = console.log) != null ? typeof ref$.apply === 'function' ? ref$.apply(console, arguments) : void 8 : void 8 : void 8;
@@ -9,85 +9,67 @@ delay = function(f, t){
 q = function(it){
   return document.querySelector(it);
 };
+random = function(it){
+  return Math.floor(Math.random() * it);
+};
 window.onload = function(){
-  var allWidth, allHeight, column, row, body, list, aColumn, req, x$;
+  var allWidth, allHeight, column, row, body, html, list, light, req, x$;
   allWidth = window.innerWidth;
   allHeight = window.innerHeight;
-  column = Math.floor(allWidth / 20 + 1);
-  row = Math.floor(allHeight / 20 + 1);
+  column = Math.floor(allWidth / 20);
+  row = Math.floor(allHeight / 20);
   body = q("body");
   log(allWidth, allHeight, row, column);
+  html = [];
   (function(){
     var i$, to$, results$ = [];
-    for (i$ = 1, to$ = row; i$ <= to$; ++i$) {
+    for (i$ = 0, to$ = column; i$ <= to$; ++i$) {
       results$.push(i$);
     }
     return results$;
-  }()).forEach(function(y){
-    var line;
-    line = "";
-    (function(){
-      var i$, to$, results$ = [];
-      for (i$ = 1, to$ = column; i$ <= to$; ++i$) {
-        results$.push(i$);
-      }
-      return results$;
-    }()).forEach(function(x){
-      var point, ref$;
-      point = "p" + y + "-" + x;
-      return line = line + tmpl((ref$ = {}, ref$[".cell/" + point] = "", ref$));
-    });
-    return body.innerHTML += tmpl({
-      ".line": line
-    });
+  }()).forEach(function(x){
+    var id, ref$;
+    id = "x" + x;
+    return html.push(tmpl((ref$ = {}, ref$["pre.column/" + id] = "", ref$)));
   });
-  list = [];
-  aColumn = {
-    content: repeatArray$([""], row),
-    column: 0,
-    render: function(){
-      var self;
-      if (this.content.length < row) {
-        this.more();
-      }
-      self = this;
-      (function(){
-        var i$, to$, results$ = [];
-        for (i$ = 1, to$ = row; i$ <= to$; ++i$) {
-          results$.push(i$);
-        }
-        return results$;
-      }()).forEach(function(y){
-        var point;
-        point = "#p" + y + "-" + self.column;
-        return q(point).innerText = self.content[row + 1 - y] || "";
+  body.innerHTML = html.join("");
+  list = {};
+  light = {
+    elem: {},
+    string: [],
+    buffer: [],
+    load: function(){
+      var text, ref$;
+      text = ((ref$ = list.shift()) != null ? ref$.trim().split("") : void 8) || "";
+      text[0] = tmpl({
+        "span.head": text[0]
       });
-      this.content.shift();
-      return delay(300, function(){
-        return self.render();
-      });
+      this.buffer = text.concat(this.buffer);
+      return this.buffer = this.buffer.concat(repeatArray$(["-"], random(40)));
     },
-    more: function(){
-      var self, num;
+    render: function(){
+      var head, self;
+      if (this.buffer.length <= 0) {
+        this.load();
+      }
+      if (this.string.length > row) {
+        this.string.pop();
+      }
+      log(this.buffer);
+      head = this.buffer.shift();
+      if (head != null) {
+        this.string.unshift(head);
+      }
+      this.elem.innerHTML = this.string.join("");
       self = this;
-      list.shift().split("").forEach(function(char){
-        return self.content.push(char);
-      });
-      num = Math.floor(Math.random() * 40);
-      return (function(){
-        var i$, to$, results$ = [];
-        for (i$ = 1, to$ = num; i$ <= to$; ++i$) {
-          results$.push(i$);
-        }
-        return results$;
-      }()).forEach(function(){
-        return self.content.push("");
+      return delay(1000, function(){
+        return self.render();
       });
     }
   };
   req = new XMLHttpRequest;
   x$ = req;
-  x$.open("get", "../data/全宋词.txt");
+  x$.open("get", "../data/piece.txt");
   x$.send();
   x$.onload = function(res){
     var text, trim, notEmpty;
@@ -101,18 +83,20 @@ window.onload = function(){
     list = text.split("\n").map(trim).filter(notEmpty);
     return (function(){
       var i$, to$, results$ = [];
-      for (i$ = 1, to$ = column; i$ <= to$; ++i$) {
+      for (i$ = 0, to$ = column; i$ <= to$; ++i$) {
         results$.push(i$);
       }
       return results$;
     }()).forEach(function(x){
-      var light;
-      light = {
-        __proto__: aColumn,
-        column: x,
-        content: repeatArray$([""], row)
+      var id, drop;
+      id = '#x' + x;
+      drop = {
+        __proto__: light,
+        buffer: [],
+        string: [],
+        elem: q(id)
       };
-      return light.render();
+      return drop.render();
     });
   };
   return x$;
