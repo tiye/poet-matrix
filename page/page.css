@@ -1,0 +1,22 @@
+body {
+  margin: 0px;
+  font-family: "wenquanyi micro hei mono", monaco, monospace;
+  overflow: hidden;
+  background: #000;
+  color: #b8b814;
+}
+* {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+.line {
+  white-space: nowrap;
+  letter-spacing: 0px;
+  line-height: 20px;
+  height: 20px;
+}
+.cell {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
