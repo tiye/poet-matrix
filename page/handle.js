@@ -1,4 +1,4 @@
-var log, delay, repeat, q, random, notPunction, duration, animate, slice$ = [].slice;
+var log, delay, repeat, q, random, notPunction, duration, fadeColor, animate, slice$ = [].slice;
 log = function(){
   var ref$;
   return typeof console != 'undefined' && console !== null ? (ref$ = console.log) != null ? typeof ref$.apply === 'function' ? ref$.apply(console, arguments) : void 8 : void 8 : void 8;
@@ -36,6 +36,7 @@ Array.prototype.remove = function(elem){
   return ret;
 };
 duration = 60;
+fadeColor = "hsl(20,70%,50%)";
 animate = function(list, row, column){
   var spit, childs, i$, len$, line, run, results$ = [];
   spit = function(){
@@ -71,13 +72,15 @@ animate = function(list, row, column){
           next = elem.nextElementSibling;
           log("hide", next);
           if (last != null) {
-            last.style.color = "hsl(20,70%,40%)";
+            last.style.color = fadeColor;
           }
-          if (next != null) {
-            return delay(duration, function(){
+          return delay(duration, function(){
+            if (next != null) {
               return show(next, chars);
-            });
-          }
+            } else {
+              return elem.style.color = fadeColor;
+            }
+          });
         };
         show(first(), chars);
         time = duration * random(60);

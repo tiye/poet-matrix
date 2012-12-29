@@ -20,6 +20,8 @@ Array::remove = (elem) ->
 
 duration = 60
 
+fade-color = "hsl(20,70%,50%)"
+
 animate = (list, row, column) ->
 
   spit = ->
@@ -43,8 +45,10 @@ animate = (list, row, column) ->
             last = elem.previous-element-sibling
             next = elem.next-element-sibling
             log "hide", next
-            if last? then last.style.color = "hsl(20,70%,40%)"
-            if next? then delay duration, -> show next, chars
+            if last? then last.style.color = fade-color
+            delay duration, ->
+              if next? then show next, chars
+              else elem.style.color = fade-color
           show first!, chars
           time = (duration * (random 60)) 
           delay time, start
