@@ -1,64 +1,85 @@
 
 log = -> console?.log?.apply? console, arguments
+log = ->
 delay = (f, t) -> setTimeout t, f
+repeat = (f, t) -> setInterval t, f
 q = -> document.query-selector it
-random = -> Math.floor (Math.random! * it)
+random = ->
+  ret = Math.floor (Math.random! * it)
+  ret
+
+not-punction = (char) ->
+  if (char in "。\）\（，、：“”>|".split("")) then " "
+  else char
+
+Array::remove = (elem) ->
+  ret = []
+  @for-each (item) ->
+    if item isnt elem then ret.push item
+  ret
+
+duration = 60
+
+animate = (list, row, column) ->
+
+  spit = ->
+    out = list[0 to row]
+    list := list[row to] +++ out.concat!
+    out
+
+  childs = (q "body").child-nodes
+  for line in childs
+    run = (line) ->
+      first = -> line.first-element-child
+      dark = no
+      do start = ->
+        if dark
+          chars = spit!
+          show = (elem, chars) ->
+            log "show", elem, chars
+            elem.style.opacity = 1
+            elem.inner-text = chars.shift!
+            elem.style.color = "hsl(0,0%,100%)"
+            last = elem.previous-element-sibling
+            next = elem.next-element-sibling
+            log "hide", next
+            if last? then last.style.color = "hsl(20,70%,40%)"
+            if next? then delay duration, -> show next, chars
+          show first!, chars
+          time = (duration * (random 60)) 
+          delay time, start
+        else
+          hide = (elem) ->
+            elem.style.opacity = 0
+            next = elem.next-element-sibling
+            log "hide", next
+            if next? then delay duration, -> hide next
+          hide first!
+          time = (duration * (random 100)) 
+          delay time, start
+        dark := not dark
+    run line
 
 window.onload = ->
   all-width = window.inner-width
   all-height = window.inner-height
   column = Math.floor (all-width / 20)
   row = Math.floor (all-height / 20)
-  body = q "body"
-  log all-width, all-height, row, column
 
-  html = []
-  [0 to column].for-each (x) ->
-    id = "x" + x
-    html.push tmpl "pre.column/#id": ""
-  body.innerHTML = html.join ""
+  make-line = ->
+    inner = [0 to row].map (-> tmpl ".cell": "") .join ""
+    tmpl ".line": inner
+  html = [0 to column].map make-line .join ""
 
-  list = {}
-
-  light =
-    elem: {}
-    string: []
-    buffer: []
-    load: ->
-      # log "list", list
-      text = list.shift()?.trim!.split("") or ""
-      # log "text:", text.join ""
-      text.0 = tmpl "span.head": text.0
-      @buffer = text.concat @buffer
-      @buffer = @buffer.concat (["-"] * (random 40))
-    render: ->
-      if @buffer.length <= 0 then @load!
-      if @string.length > row then @string.pop!
-      log @buffer
-      head = @buffer.shift!
-      # log "head" head
-      @string.unshift head if head?
-      @elem.innerHTML = @string.join ""
-      # log @string.join ""
-      self = @
-      delay 1000, -> self.render!
+  (q "body").innerHTML = html
 
   req = new XMLHttpRequest
   req
     ..open "get", "../data/piece.txt"
+    # ..open "get", "../data/全宋词.txt"
     ..send()
     ..onload = (res) ->
       text = res.target.response
-      trim = -> it.trim()
-      not-empty = -> it.length > 0
-      list := text.split "\n" .map trim .filter not-empty
-      # log "got list:", list
-
-      [0 to column].for-each (x) ->
-        id = '#x' + x
-        drop =
-          __proto__: light
-          buffer: []
-          string: []
-          elem: q id
-        drop.render!
+      list = text.split "" .map not-punction
+      log "got list:", list
+      animate list, row, column

@@ -1,108 +1,153 @@
-var log, delay, q, random;
+var log, delay, repeat, q, random, notPunction, duration, animate, slice$ = [].slice;
 log = function(){
   var ref$;
   return typeof console != 'undefined' && console !== null ? (ref$ = console.log) != null ? typeof ref$.apply === 'function' ? ref$.apply(console, arguments) : void 8 : void 8 : void 8;
 };
+log = function(){};
 delay = function(f, t){
   return setTimeout(t, f);
+};
+repeat = function(f, t){
+  return setInterval(t, f);
 };
 q = function(it){
   return document.querySelector(it);
 };
 random = function(it){
-  return Math.floor(Math.random() * it);
+  var ret;
+  ret = Math.floor(Math.random() * it);
+  return ret;
+};
+notPunction = function(char){
+  if (in$(char, "。）（，、：“”>|".split(""))) {
+    return " ";
+  } else {
+    return char;
+  }
+};
+Array.prototype.remove = function(elem){
+  var ret;
+  ret = [];
+  this.forEach(function(item){
+    if (item !== elem) {
+      return ret.push(item);
+    }
+  });
+  return ret;
+};
+duration = 60;
+animate = function(list, row, column){
+  var spit, childs, i$, len$, line, run, results$ = [];
+  spit = function(){
+    var out;
+    out = slice$.call(list, 0, row + 1 || 9e9);
+    list = slice$.call(list, row).concat(out.concat());
+    return out;
+  };
+  childs = q("body").childNodes;
+  for (i$ = 0, len$ = childs.length; i$ < len$; ++i$) {
+    line = childs[i$];
+    run = fn$;
+    results$.push(run(line));
+  }
+  return results$;
+  function fn$(line){
+    var first, dark, start;
+    first = function(){
+      return line.firstElementChild;
+    };
+    dark = false;
+    return (start = function(){
+      var chars, show, time, hide;
+      if (dark) {
+        chars = spit();
+        show = function(elem, chars){
+          var last, next;
+          log("show", elem, chars);
+          elem.style.opacity = 1;
+          elem.innerText = chars.shift();
+          elem.style.color = "hsl(0,0%,100%)";
+          last = elem.previousElementSibling;
+          next = elem.nextElementSibling;
+          log("hide", next);
+          if (last != null) {
+            last.style.color = "hsl(20,70%,40%)";
+          }
+          if (next != null) {
+            return delay(duration, function(){
+              return show(next, chars);
+            });
+          }
+        };
+        show(first(), chars);
+        time = duration * random(60);
+        delay(time, start);
+      } else {
+        hide = function(elem){
+          var next;
+          elem.style.opacity = 0;
+          next = elem.nextElementSibling;
+          log("hide", next);
+          if (next != null) {
+            return delay(duration, function(){
+              return hide(next);
+            });
+          }
+        };
+        hide(first());
+        time = duration * random(100);
+        delay(time, start);
+      }
+      return dark = !dark;
+    })();
+  }
 };
 window.onload = function(){
-  var allWidth, allHeight, column, row, body, html, list, light, req, x$;
+  var allWidth, allHeight, column, row, makeLine, html, req, x$;
   allWidth = window.innerWidth;
   allHeight = window.innerHeight;
   column = Math.floor(allWidth / 20);
   row = Math.floor(allHeight / 20);
-  body = q("body");
-  log(allWidth, allHeight, row, column);
-  html = [];
-  (function(){
+  makeLine = function(){
+    var inner;
+    inner = (function(){
+      var i$, to$, results$ = [];
+      for (i$ = 0, to$ = row; i$ <= to$; ++i$) {
+        results$.push(i$);
+      }
+      return results$;
+    }()).map(function(){
+      return tmpl({
+        ".cell": ""
+      });
+    }).join("");
+    return tmpl({
+      ".line": inner
+    });
+  };
+  html = (function(){
     var i$, to$, results$ = [];
     for (i$ = 0, to$ = column; i$ <= to$; ++i$) {
       results$.push(i$);
     }
     return results$;
-  }()).forEach(function(x){
-    var id, ref$;
-    id = "x" + x;
-    return html.push(tmpl((ref$ = {}, ref$["pre.column/" + id] = "", ref$)));
-  });
-  body.innerHTML = html.join("");
-  list = {};
-  light = {
-    elem: {},
-    string: [],
-    buffer: [],
-    load: function(){
-      var text, ref$;
-      text = ((ref$ = list.shift()) != null ? ref$.trim().split("") : void 8) || "";
-      text[0] = tmpl({
-        "span.head": text[0]
-      });
-      this.buffer = text.concat(this.buffer);
-      return this.buffer = this.buffer.concat(repeatArray$(["-"], random(40)));
-    },
-    render: function(){
-      var head, self;
-      if (this.buffer.length <= 0) {
-        this.load();
-      }
-      if (this.string.length > row) {
-        this.string.pop();
-      }
-      log(this.buffer);
-      head = this.buffer.shift();
-      if (head != null) {
-        this.string.unshift(head);
-      }
-      this.elem.innerHTML = this.string.join("");
-      self = this;
-      return delay(1000, function(){
-        return self.render();
-      });
-    }
-  };
+  }()).map(makeLine).join("");
+  q("body").innerHTML = html;
   req = new XMLHttpRequest;
   x$ = req;
   x$.open("get", "../data/piece.txt");
   x$.send();
   x$.onload = function(res){
-    var text, trim, notEmpty;
+    var text, list;
     text = res.target.response;
-    trim = function(it){
-      return it.trim();
-    };
-    notEmpty = function(it){
-      return it.length > 0;
-    };
-    list = text.split("\n").map(trim).filter(notEmpty);
-    return (function(){
-      var i$, to$, results$ = [];
-      for (i$ = 0, to$ = column; i$ <= to$; ++i$) {
-        results$.push(i$);
-      }
-      return results$;
-    }()).forEach(function(x){
-      var id, drop;
-      id = '#x' + x;
-      drop = {
-        __proto__: light,
-        buffer: [],
-        string: [],
-        elem: q(id)
-      };
-      return drop.render();
-    });
+    list = text.split("").map(notPunction);
+    log("got list:", list);
+    return animate(list, row, column);
   };
   return x$;
 };
-function repeatArray$(arr, n){
-  for (var r = []; n > 0; (n >>= 1) && (arr = arr.concat(arr)))
-    if (n & 1) r.push.apply(r, arr);
-  return r;
+function in$(x, arr){
+  var i = -1, l = arr.length >>> 0;
+  while (++i < l) if (x === arr[i] && i in arr) return true;
+  return false;
 }

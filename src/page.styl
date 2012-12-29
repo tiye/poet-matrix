@@ -2,19 +2,20 @@
 body
   margin 0px
   font-family "wenquanyi micro hei mono", monaco, monospace
-  // overflow hidden
-  background black
-  color hsl(60,80,40)
+  overflow hidden
+  background hsl(330,20,10)
+  color white
   display -webkit-flex
   -webkit-flex-flow row
 
 *
   box-sizing border-box
   -moz-box-sizing border-box
-  // box-shadow 0px 0px 4px hsl(0,0,80)
+  // box-shadow 0px 0px 1px hsl(0,0,80)
 
-.column
-  white-space nowrap
-  letter-spacing 0px
-  line-height 20px
-  -webkit-writing-mode vertical-rl
+.line
+  width 20px
+  .cell
+    width 20px
+    height 20px
+    font-size 13px
