@@ -6,7 +6,7 @@ html
     title "Astray Graph"
     meta (:charset utf-8)
     link (:rel stylesheet) (:href css/style.css)
-    link (:rel icon) (:type image/png) (:href png/graph.png)
+    link (:rel icon) (:type image/png) (:href png/matrix.png)
     script (:defer) (:src build/main.js)
 
   body

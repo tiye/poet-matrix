@@ -1,5 +1,5 @@
 #!/usr/bin/env coffee
-project = 'apus-forum'
+project = 'poet-matrix'
 
 require 'shelljs/make'
 path = require 'path'
@@ -91,4 +91,5 @@ target.rsync = ->
         'js'
         '.git/'
         'png/*.jpg'
+        'data/全宋词.txt'
       ]
