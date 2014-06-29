@@ -1,2 +1,7 @@
 
-server/node_modules
+node_modules/
+bower_components/
+build/
+js/
+
+index.html
